@@ -17,10 +17,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var templateDir = "/root/go/tiny/bin/templates/"
+
 var templates = template.Must(template.ParseFiles(
-	"./bin/templates/index.html",
-	"./bin/templates/header.html",
-	"./bin/templates/footer.html"))
+	templateDir + "index.html",
+	templateDir + "header.html",
+	templateDir + "footer.html"))
 
 type Tiny struct {
 	URL string
