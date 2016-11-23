@@ -32,9 +32,9 @@ $ go get github.com/lib/pq
 
 ### API Usage
 
-Limited to 10 requests per hour
+Limited to 10 requests per hour per IP address
 
-Example Request:
+Example Request (via GET):
 
 ```sh
 http://r8r.org/generate/?url=http://www.golang.org
