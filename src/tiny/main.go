@@ -1,5 +1,6 @@
-// URL Minifier
+// Golang URL Minifier
 // Creates tiny URLS from a given URL.
+// https://github.com/nickvellios/Golang-URL-Minifier
 // Nick Vellios
 // 11/23/2016
 
@@ -85,9 +86,6 @@ func generateHandler(w http.ResponseWriter, r *http.Request) {
 
 	if tiny.throttleCheck() {
 		tiny.save()
-
-		//fmt.Println("Added value: ", url, " to key: ", tiny.Path)
-		//fmt.Fprintf(w, "Your tiny URL for %s is: http://r8r.org/%s", tiny.URL, tiny.Path)
 		writeResponse(w, 200, "http://r8r.org/" + tiny.Path, "")
 	} else {
 		writeResponse(w, 200, "", "You're doing that too often.  Slow down")

@@ -1,5 +1,6 @@
-// URL Minifier
+// Golang URL Minifier
 // Database Configuration
+// https://github.com/nickvellios/Golang-URL-Minifier
 // Nick Vellios
 // 11/14/2016
 

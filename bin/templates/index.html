@@ -2,10 +2,34 @@
 {{ template "header" }}
 <div class="container">
 	<div class="page-header">
-		<h1>Free URL minifier</h1>
+		<h1>Golang URL minifier</h1>
 	</div>
 	<p class="lead">Paste a URL to have it shortened into an easy to share format.</p>
-	<p>This project was written in the <a href="http://golang.org">Go programming language</a> and is open source.  Find it on <a href="https://github.com/nickvellios/Golang-URL-Minifier">Github</a>.</p>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="input-group">
+				<input type="text" class="form-control" id="url_field" placeholder="Enter URL to shrink" autofocus>
+				<span class="input-group-btn">
+					<button class="btn btn-success" type="button" onclick="getTiny()">Go!</button>
+				</span>
+			</div>
+		</div>
+		<div class="col-md-6" id="copy_col" style="display:none;">
+			<div class="input-group">
+				<input type="text" class="form-control" id="tiny_url_field">
+				<span class="input-group-btn">
+					<button class="btn btn-info" type="button" onclick="copyURL()">Copy To Clipboard</button>
+				</span>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6" id="messages1">
+		</div>
+		<div class="col-md-6" id="messages2">
+		</div>
+	</div>
 </div>
 {{ template "footer" }}
 {{ end }}
