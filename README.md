@@ -32,10 +32,21 @@ $ go get github.com/lib/pq
 
 ### API Usage
 
-Limited to 10 per hour
+Limited to 10 requests per hour
+
+Example Request:
 
 ```sh
 http://r8r.org/generate/?url=http://www.golang.org
+```
+
+Example JSON Response:
+
+```sh
+{
+	"url": "http://r8r.org/dvHhd"
+	"error": ""
+}
 ```
 
 ### Todos
