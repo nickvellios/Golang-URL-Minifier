@@ -30,6 +30,14 @@ Golang URL Minifier requires [pq](https://github.com/lib/pq) to run.
 $ go get github.com/lib/pq
 ```
 
+### API Usage
+
+Limited to 10 per hour
+
+```sh
+http://r8r.org/generate/?url=http://www.golang.org
+```
+
 ### Todos
 
  - Admin dashboard
