@@ -1,0 +1,6 @@
+
+pkg/darwin_amd64/github.com/lib/pq.a
+
+pkg/darwin_amd64/github.com/lib/pq/oid.a
+
+src/github.com/lib/pq/
