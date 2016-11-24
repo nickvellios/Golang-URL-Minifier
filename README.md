@@ -11,6 +11,9 @@ A URL minifier written in Go.
 You can also:
   - Use the API to integrate your apps
 
+<img src="https://raw.githubusercontent.com/nickvellios/Golang-URL-Minifier/master/ss1.png" alt="First Screenshot" width="45%" height="45%">
+<img src="https://raw.githubusercontent.com/nickvellios/Golang-URL-Minifier/master/ss2.png" alt="Second Screenshot" width="45%" height="45%">
+
 ### Tech
 
 Golang URL Minifier relies on open source projects to work properly:
