@@ -31,6 +31,11 @@ type Tiny struct {
 	ID        string
 }
 
+type URLResponse struct {
+	URL   string `json:"url"`
+	Error string `json:"error"`
+}
+
 // There may be URLs longer, but to avoid attacks we don't want them.
 const (
 	MAX_URL = 1024
@@ -38,18 +43,10 @@ const (
 
 // Send a JSON result back to the client with given status code
 func writeResponse(w http.ResponseWriter, code int, url, error string) error {
-	pkg := map[string]string{"url": url, "error": error}
-	js, err := json.Marshal(pkg)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println(err.Error())
-		return err
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Write(js)
+	ur := &URLResponse{url, error}
+	err := json.NewEncoder(w).Encode(ur)
 
 	return err
 }
