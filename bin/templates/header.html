@@ -16,27 +16,8 @@
 		</style>
 		<script>
 			(function () {
-				trackCopyPaste(document);
 				$('#url_field').focus();
 			}());
-
-			function trackCopyPaste(elm) {
-				elm.onkeydown = interceptKeys
-			}
-
-			function interceptKeys(evt) {
-				evt = evt || window.event // IE support
-				var c = evt.keyCode
-				var ctrlDown = evt.ctrlKey || evt.metaKey // Mac support
-				
-				// Check for Alt+Gr (http://en.wikipedia.org/wiki/AltGr_key)
-				if (ctrlDown && evt.altKey) return true
-				else if (ctrlDown && c == 67) { // Copy
-				} else if (ctrlDown && c == 86) { // Paste
-				}
-				
-				return true
-			}
 
 			function copyTextToClipboard(text) {
 				var textArea = document.createElement("textarea");
