@@ -7,27 +7,34 @@
 package main
 
 import (
-	"fmt"
-	"math"
-	"net/http"
-	"net"
-	"html/template"
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	_ "github.com/lib/pq"
+	"html/template"
+	"math"
+	"net"
+	"net/http"
+	"regexp"
 )
 
 var templates = template.Must(template.ParseFiles(
-	templateDir + "index.html",
-	templateDir + "header.html",
-	templateDir + "footer.html"))
+	templateDir+"index.html",
+	templateDir+"header.html",
+	templateDir+"footer.html"))
 
 type Tiny struct {
-	URL string
-	Path string
-	IP string
+	URL       string
+	Path      string
+	IP        string
 	Timestamp string
-	ID string
+	ID        string
 }
+
+// There may be URLs longer, but to avoid attacks we don't want them.
+const (
+	MAX_URL = 1024
+)
 
 // Send a JSON result back to the client with given status code
 func writeResponse(w http.ResponseWriter, code int, url, error string) error {
@@ -55,8 +62,20 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data []map[string]string
 }
 
 // HTTP handler for /generate/ which is the API.  Takes a long URL and generates a tiny URL.
-func generateHandler(w http.ResponseWriter, r *http.Request) {
+func (udb *urlDB) generateHandler(w http.ResponseWriter, r *http.Request) {
 	url := r.FormValue("url")
+
+	// Ignore super long URLs
+	if len(url) > MAX_URL {
+		writeResponse(w, 413, "", "URL exceeds maximum length of 1024 characters")
+		return
+	}
+
+	// 301/302 redirects fail without a valid URL.  Our site frondend checks for this and adds a http:// prefix if needed, but we will check and do the same for API requests
+	reg, _ := regexp.Compile(`^(http|https|ftp)+(://)`)
+	if !reg.MatchString(url) {
+		url = "http://" + url
+	}
 
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
@@ -66,21 +85,21 @@ func generateHandler(w http.ResponseWriter, r *http.Request) {
 	tiny := &Tiny{URL: url, IP: ip}
 
 	// Limit to 10 requests per hour per IP
-	if tiny.throttleCheck() {
-		tiny.save()
-		writeResponse(w, 200, baseURL + tiny.Path, "")
+	if tiny.throttleCheck(udb.db) {
+		tiny.save(udb.db)
+		writeResponse(w, 200, baseURL+tiny.Path, "")
 	} else {
-		writeResponse(w, 200, "", "You're doing that too often.  Slow down")
+		writeResponse(w, 429, "", "You're doing that too often.  Slow down")
 	}
 }
 
 // HTTP handler for / path
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+func (udb *urlDB) rootHandler(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path[len("/"):]
 
 	if len(url) > 0 && url != "favicon.ico" {
 		t := &Tiny{Path: url}
-		t.load()
+		t.load(udb.db)
 		fmt.Println("Redirecting to: ", t.URL)
 		http.Redirect(w, r, t.URL, 302)
 
@@ -91,7 +110,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Save URL to DB, get unique ID, generate tiny path from the ID, update the DB.
-func (t *Tiny) save() int {
+func (t *Tiny) save(db *sql.DB) int {
 	var lastInsertId int
 	err := db.QueryRow("INSERT INTO url_map(path, url, ip) VALUES($1,$2,$3) returning id;", "", t.URL, t.IP).Scan(&lastInsertId)
 	checkDBErr(err)
@@ -107,7 +126,7 @@ func (t *Tiny) save() int {
 }
 
 // Load URL from DB.
-func (t *Tiny) load() {
+func (t *Tiny) load(db *sql.DB) {
 	rows, err := db.Query("SELECT url FROM url_map WHERE path = $1", t.Path)
 	checkDBErr(err)
 
@@ -118,7 +137,7 @@ func (t *Tiny) load() {
 }
 
 // Check if user has used service more than 10 times in an hour.
-func (t *Tiny) throttleCheck() bool {
+func (t *Tiny) throttleCheck(db *sql.DB) bool {
 	rows, err := db.Query("SELECT COUNT(*) as count FROM url_map WHERE ip = $1 AND t_stamp > CURRENT_TIMESTAMP - INTERVAL '1 hour'", t.IP)
 	checkDBErr(err)
 
@@ -128,18 +147,18 @@ func (t *Tiny) throttleCheck() bool {
 		checkDBErr(err)
 	}
 
-	return count<10
+	return count < 10
 }
 
 // Generate a unique A-Z/0-9 based URL from a given number input.
 func generateCode(number int) string {
 	var out []byte
-	codes := []byte("abcdefghjkmnpqrstuvwxyz23456789ABCDEFGHJKMNPQRSTUVWXYZ");
+	codes := []byte("abcdefghjkmnpqrstuvwxyz23456789ABCDEFGHJKMNPQRSTUVWXYZ")
 
 	for number > 53 {
 		key := number % 54
-		number = int(math.Floor(float64(number) / 54) - 1)
-		out = append(out, []byte(codes[key:key+1])[0])
+		number = int(math.Floor(float64(number)/54) - 1)
+		out = append(out, []byte(codes[key : key+1])[0])
 	}
 
 	return string(append(out, codes[number]))

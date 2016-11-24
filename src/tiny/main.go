@@ -7,21 +7,22 @@
 package main
 
 import (
-	"net/http"
-	"log"
 	_ "github.com/lib/pq"
+	"log"
+	"net/http"
 )
 
 var templateDir = "/root/go/tiny/bin/templates/"
 var baseURL = "http://r8r.org/"
 
 func main() {
-	db = openDB()
-	defer db.Close()
+	gdb := &urlDB{}
+	gdb.open()
+	defer gdb.db.Close()
 
 	// HTTP Routing
-	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/generate/", generateHandler)
+	http.HandleFunc("/", gdb.rootHandler)
+	http.HandleFunc("/generate/", gdb.generateHandler)
 
 	log.Fatal(http.ListenAndServe(":80", nil))
 }

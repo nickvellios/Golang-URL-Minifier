@@ -23,7 +23,9 @@ import (
 	"fmt"
 )
 
-var db *sql.DB
+type urlDB struct {
+	db *sql.DB
+}
 
 // Database configuration
 
@@ -40,10 +42,10 @@ func checkDBErr(err error) {
 	}
 }
 
-// Open a connection to our database and return a pointer to the instance of the DB connection
-func openDB() *sql.DB {
+func (udb *urlDB) open() error {
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
-	db, err := sql.Open("postgres", dbinfo)
+	var err error
+	udb.db, err = sql.Open("postgres", dbinfo)
 	checkDBErr(err)
-	return db
+	return err
 }
