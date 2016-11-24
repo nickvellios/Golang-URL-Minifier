@@ -50,6 +50,11 @@
 				var url = $('#url_field').val();
 
 				if (url.length) {
+					if (url.length > 1024) {
+						pushMessage('messages1', 'Oops!', 'That URL is too long!', 'warning');
+						return;
+					}
+
 					var pattern = /^((http|https|ftp):\/\/)/;
 					if(!pattern.test(url)) {
 						url = "http://" + url;
@@ -66,13 +71,17 @@
 						$('#copy_col').css('display', 'block');
 					});
 				} else {
-					$('#messages1').html('<div class="alert alert-warning alert-dismissable fade in"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Oops! </strong> Looks like you forgot to enter a URL!</div>');
+					pushMessage('messages1', 'Oops!', 'Looks like you forgot to enter a URL!', 'warning');
 				}
 			}
 
 			function copyURL() {
 				copyTextToClipboard($('#tiny_url_field').val());
-				$('#messages2').html('<div class="alert alert-success alert-dismissable fade in"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Success! </strong> URL copied to clipboard!</div>');
+				pushMessage('messages2', 'Success!', 'URL copied to clipboard!', 'success');
+			}
+
+			function pushMessage(id, title, message, type) {
+				$('#' + id).html('<div class="alert alert-' + type + ' alert-dismissable fade in"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>' + title + ' </strong> ' + message + '</div>');
 			}
 		</script>
 	</head>
