@@ -74,7 +74,7 @@ func (udb *urlDB) generateHandler(w http.ResponseWriter, r *http.Request) {
 		writeResponse(w, 413, "", "URL exceeds maximum length of 1024 characters")
 		return
 	}
-	
+
 	// Check again to be sure we aren't flooded with excess data
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_URL)
 	err := r.ParseForm()
@@ -104,7 +104,7 @@ func (udb *urlDB) generateHandler(w http.ResponseWriter, r *http.Request) {
 
 	// To prevent someone from building predictive redirect chains to try and overload us
 	if strings.Contains(urlf, baseURL) {
-		writeResponse(w, 400, "", "Short urls pointing to " + baseURL + " are not allowed")
+		writeResponse(w, 400, "", "Short urls pointing to "+baseURL+" are not allowed")
 		return
 	}
 
