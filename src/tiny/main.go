@@ -10,10 +10,16 @@ import (
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
+	"time"
 )
 
 var templateDir = "/root/go/tiny/bin/templates/"
 var baseURL = "http://r8r.org/"
+
+const (
+	readTimeout  = time.Duration(1 * time.Second)
+	writeTimeout = readTimeout
+)
 
 func main() {
 	gdb := &urlDB{}
@@ -24,5 +30,11 @@ func main() {
 	http.HandleFunc("/", gdb.rootHandler)
 	http.HandleFunc("/generate/", gdb.generateHandler)
 
-	log.Fatal(http.ListenAndServe(":80", nil))
+	srv := http.Server{
+		Addr:         ":80",
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+	}
+
+	log.Fatal(srv.ListenAndServe())
 }
