@@ -1,4 +1,4 @@
-# Golang URL Minifier
+# Golang URL Minifier v0.0.1
 
 [Check it out at http://r8r.org](http://r8r.org)
 
@@ -37,10 +37,10 @@ $ go get github.com/lib/pq
 
 Limited to 10 requests per hour per IP address
 
-Example Request (via GET):
+Example Request (via POST only):
 
 ```sh
-http://r8r.org/generate/?url=http://www.golang.org
+curl --request POST 'http://r8r.org/generate/' --data "url=http://www.golang.org"
 ```
 
 Example JSON Response:

@@ -56,13 +56,14 @@
 					}
 
 					var pattern = /^((http|https|ftp):\/\/)/;
-					if(!pattern.test(url)) {
+					if(!pattern.test(url.toLowerCase())) {
 						url = "http://" + url;
 						$('#url_field').val(url);
 					}
-					$.getJSON('/generate/', {
+					
+					$.post( "/generate/", {
 						url: url
-					}, function(data) {
+					}).done(function(data) {
 						if (data.error.length) {
 							alert(data.error);
 							return;

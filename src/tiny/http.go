@@ -15,7 +15,8 @@ import (
 	"math"
 	"net"
 	"net/http"
-	"regexp"
+	"net/url"
+	"strings"
 )
 
 var templates = template.Must(template.ParseFiles(
@@ -38,14 +39,15 @@ type URLResponse struct {
 
 // There may be URLs longer, but to avoid attacks we don't want them.
 const (
-	MAX_URL = 1024
+	MAX_URL = 1024 // Max length of URL to shrink
+	MAX_REQ = 10   // Max number of requests per hour
 )
 
 // Send a JSON result back to the client with given status code
-func writeResponse(w http.ResponseWriter, code int, url, error string) error {
+func writeResponse(w http.ResponseWriter, code int, u, error string) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	ur := &URLResponse{url, error}
+	ur := &URLResponse{u, error}
 	err := json.NewEncoder(w).Encode(ur)
 
 	return err
@@ -60,28 +62,61 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data []map[string]string
 
 // HTTP handler for /generate/ which is the API.  Takes a long URL and generates a tiny URL.
 func (udb *urlDB) generateHandler(w http.ResponseWriter, r *http.Request) {
-	url := r.FormValue("url")
+	// In order to support MaxBytesReader and r.ContentLength I am limiting to POST/PUT requests
+	switch r.Method {
+	case "GET":
+		writeResponse(w, 405, "", "API only supports POST requests.")
+		return
+	}
 
-	// Ignore super long URLs
-	if len(url) > MAX_URL {
+	// Make sure we aren't flooded with excess data from some asshole
+	if r.ContentLength > MAX_URL {
+		writeResponse(w, 413, "", "URL exceeds maximum length of 1024 characters")
+		return
+	}
+	
+	// Check again to be sure we aren't flooded with excess data
+	r.Body = http.MaxBytesReader(w, r.Body, MAX_URL)
+	err := r.ParseForm()
+	if err != nil {
 		writeResponse(w, 413, "", "URL exceeds maximum length of 1024 characters")
 		return
 	}
 
-	// 301/302 redirects fail without a valid URL.  Our site frondend checks for this and adds a http:// prefix if needed, but we will check and do the same for API requests
-	reg, _ := regexp.Compile(`^(http|https|ftp)+(://)`)
-	if !reg.MatchString(url) {
-		url = "http://" + url
+	urlf := r.FormValue("url")
+
+	up, err := url.Parse(urlf)
+	if err != nil {
+		writeResponse(w, 500, "", "Internal Server Error")
+		return
+	}
+
+	// We expect a URL has at least one period.
+	if !strings.Contains(up.Host, ".") {
+		writeResponse(w, 400, "", "Invalid URL")
+		return
+	}
+	// 301/302 redirects fail without a valid URL.  Our site frondend checks for this and adds a
+	// http:// prefix if no URL scheme is found but we will check and do the same for API requests
+	if up.Scheme != "http" && up.Scheme != "https" && up.Scheme != "ftp" {
+		urlf = "http://" + urlf
+	}
+
+	// To prevent someone from building predictive redirect chains to try and overload us
+	if strings.Contains(urlf, baseURL) {
+		writeResponse(w, 400, "", "Short urls pointing to " + baseURL + " are not allowed")
+		return
 	}
 
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		fmt.Println("User IP is not IP:port", r.RemoteAddr)
+		writeResponse(w, 500, "", "Internal Server Error") // User IP is not IP:port.  Something is fishy, kill it just in case.
+		return
 	}
 
-	tiny := &Tiny{URL: url, IP: ip}
+	tiny := &Tiny{URL: urlf, IP: ip}
 
-	// Limit to 10 requests per hour per IP
+	// Limit to MAX_REQ requests per hour per IP
 	if tiny.throttleCheck(udb.db) {
 		tiny.save(udb.db)
 		writeResponse(w, 200, baseURL+tiny.Path, "")
@@ -92,10 +127,10 @@ func (udb *urlDB) generateHandler(w http.ResponseWriter, r *http.Request) {
 
 // HTTP handler for / path
 func (udb *urlDB) rootHandler(w http.ResponseWriter, r *http.Request) {
-	url := r.URL.Path[len("/"):]
+	urlf := r.URL.Path[len("/"):]
 
-	if len(url) > 0 && url != "favicon.ico" {
-		t := &Tiny{Path: url}
+	if len(urlf) > 0 && urlf != "favicon.ico" {
+		t := &Tiny{Path: urlf}
 		t.load(udb.db)
 		fmt.Println("Redirecting to: ", t.URL)
 		http.Redirect(w, r, t.URL, 302)
@@ -133,7 +168,7 @@ func (t *Tiny) load(db *sql.DB) {
 	}
 }
 
-// Check if user has used service more than 10 times in an hour.
+// Check if user has used service more than MAX_REQ times in an hour.
 func (t *Tiny) throttleCheck(db *sql.DB) bool {
 	rows, err := db.Query("SELECT COUNT(*) as count FROM url_map WHERE ip = $1 AND t_stamp > CURRENT_TIMESTAMP - INTERVAL '1 hour'", t.IP)
 	checkDBErr(err)
@@ -144,7 +179,7 @@ func (t *Tiny) throttleCheck(db *sql.DB) bool {
 		checkDBErr(err)
 	}
 
-	return count < 10
+	return count < MAX_REQ
 }
 
 // Generate a unique A-Z/0-9 based URL from a given number input.
