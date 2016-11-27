@@ -39,7 +39,7 @@ type URLResponse struct {
 }
 
 type Page struct {
-	Title string
+	Title   string
 	Content interface{}
 }
 
@@ -97,6 +97,8 @@ func (udb *urlDB) generateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	udb.APIKey = r.FormValue("apikey")
+
 	// We expect a URL has at least one period.
 	if !strings.Contains(up.Host, ".") {
 		writeResponse(w, 400, "", "Invalid URL")
@@ -122,10 +124,10 @@ func (udb *urlDB) generateHandler(w http.ResponseWriter, r *http.Request) {
 
 	tiny := &Tiny{URL: urlf, IP: ip}
 
-	// Limit to MAX_REQ requests per hour per IP
-	if tiny.throttleCheck(udb.db) {
+	// Limit to MAX_REQ requests per hour per IP unless API key matches.
+	if udb.APIKey == APIKey || tiny.throttleCheck(udb.db) {
 		tiny.save(udb.db)
-		writeResponse(w, 200, baseURL+"/'"+tiny.Path, "")
+		writeResponse(w, 200, baseURL+"/"+tiny.Path, "")
 	} else {
 		writeResponse(w, 429, "", "You're doing that too often.  Slow down")
 	}

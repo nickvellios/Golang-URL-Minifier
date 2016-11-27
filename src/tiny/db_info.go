@@ -24,8 +24,11 @@ import (
 )
 
 type urlDB struct {
-	db *sql.DB
+	db     *sql.DB
+	APIKey string
 }
+
+const APIKey = "1234567890ABCD" // Used for an internal system to allow limitless URLs to be processed
 
 // Database configuration
 
