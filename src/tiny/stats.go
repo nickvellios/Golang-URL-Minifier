@@ -87,11 +87,16 @@ func (udb *urlDB) statsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Encode into JSON and pass to our stats.html template
 	cht, _ := json.Marshal(chart)
-	vars := map[string]interface{}{
-		"js": template.HTML(string(cht)),
+
+	// Build template data structure
+	p := &Page{
+		Title: "Stats",
+		Content: struct {
+			JS interface{}
+		}{
+			template.HTML(string(cht)),
+		},
 	}
-	err = templates.ExecuteTemplate(w, "stats", vars)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+
+	renderTemplate(w, "stats", p)
 }

@@ -38,6 +38,11 @@ type URLResponse struct {
 	Error string `json:"error"`
 }
 
+type Page struct {
+	Title string
+	Content interface{}
+}
+
 // There may be URLs longer, but to avoid attacks we don't want them.
 const (
 	MAX_URL = 1024 // Max length of URL to shrink
@@ -54,7 +59,7 @@ func writeResponse(w http.ResponseWriter, code int, u, error string) error {
 	return err
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string, data []map[string]string) {
+func renderTemplate(w http.ResponseWriter, tmpl string, data *Page) {
 	err := templates.ExecuteTemplate(w, tmpl, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -139,7 +144,8 @@ func (udb *urlDB) rootHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderTemplate(w, "index", nil)
+	p := &Page{Title: "Home"}
+	renderTemplate(w, "index", p)
 }
 
 // Save URL to DB, get unique ID, generate tiny path from the ID, update the DB.

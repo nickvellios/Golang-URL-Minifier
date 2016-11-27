@@ -63,7 +63,7 @@ Example JSON Response:
 License
 ----
 
-None.  For more information, please refer to <http://unlicense.org/>
+Unlicense.  For more information, please refer to <http://unlicense.org/>
 
 
 **Free Software, Hell Yeah!**
