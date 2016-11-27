@@ -66,7 +66,7 @@ func (udb *urlDB) statsHandler(w http.ResponseWriter, r *http.Request) {
 		const layout = "Jan 2, 2006"
 		date := t.Format(layout)
 
-		datestr := fmt.Sprintf("Date(%d,%d,%d)", t.Year(), t.Month(), t.Day())
+		datestr := fmt.Sprintf("Date(%d,%d,%d)", t.Year(), t.Month()-1, t.Day())
 		dailytotal := strconv.FormatInt(int64(count), 10)
 
 		rws = append(rws, Rows{
