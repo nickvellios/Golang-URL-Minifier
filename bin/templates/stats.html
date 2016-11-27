@@ -1,0 +1,54 @@
+{{ define "stats" }}
+{{ template "header" }}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+	$(function() {
+		google.charts.load('current', {packages: ['corechart', 'line']});
+		google.charts.setOnLoadCallback(draw);
+	});
+
+	function draw() {
+		var data = decodeURI('{{ .js }}');
+		console.log(data);
+		var chart_data = new google.visualization.DataTable(data);
+		var options = {
+			hAxis: {
+				title: 'Date'
+			},
+			vAxis: {
+				title: 'Number of URLs minified',
+				minValue: 4,
+				viewWindow: {
+					min: 0
+				}
+			},
+			backgroundColor: '#daf6df',
+			colors: ['#d89462'],
+			lineWidth: 5,
+			crosshair: {
+				color: '#888',
+				trigger: 'selection'
+			},
+			trendlines: {
+				0: {type: 'polynomial', color: '#333', lineWidth: 10, visibleInLegend: true, labelInLegend: 'Trend', opacity: .22}
+			},
+			title: 'Daily Stats'
+		};
+		
+		chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+		chart.draw(chart_data, options);
+	}
+</script>
+<div class="container">
+	<div class="page-header">
+		<h1>Golang URL minifier stats</h1>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-12">
+			<div id="chart_div"></div>
+		</div>
+	</div>
+</div>
+{{ template "footer" }}
+{{ end }}

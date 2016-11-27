@@ -14,7 +14,7 @@ import (
 )
 
 var templateDir = "/root/go/tiny/bin/templates/"
-var baseURL = "http://r8r.org/"
+var baseURL = "http://r8r.org"
 
 const (
 	readTimeout  = time.Duration(1 * time.Second)
@@ -29,6 +29,7 @@ func main() {
 	// HTTP Routing
 	http.HandleFunc("/", gdb.rootHandler)
 	http.HandleFunc("/generate/", gdb.generateHandler)
+	http.HandleFunc("/stats/", gdb.statsHandler)
 
 	srv := http.Server{
 		Addr:         ":80",

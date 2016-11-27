@@ -22,7 +22,8 @@ import (
 var templates = template.Must(template.ParseFiles(
 	templateDir+"index.html",
 	templateDir+"header.html",
-	templateDir+"footer.html"))
+	templateDir+"footer.html",
+	templateDir+"stats.html"))
 
 type Tiny struct {
 	URL       string
@@ -119,7 +120,7 @@ func (udb *urlDB) generateHandler(w http.ResponseWriter, r *http.Request) {
 	// Limit to MAX_REQ requests per hour per IP
 	if tiny.throttleCheck(udb.db) {
 		tiny.save(udb.db)
-		writeResponse(w, 200, baseURL+tiny.Path, "")
+		writeResponse(w, 200, baseURL+"/'"+tiny.Path, "")
 	} else {
 		writeResponse(w, 429, "", "You're doing that too often.  Slow down")
 	}

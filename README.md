@@ -1,4 +1,4 @@
-# Golang URL Minifier v0.0.1
+# Golang URL Minifier v0.0.2
 
 [Check it out at http://r8r.org](http://r8r.org)
 
@@ -56,7 +56,7 @@ Example JSON Response:
 
  - Admin dashboard
  - User accounts to remove throttle
- - Traffic analytics
+ - Traffic analytics (Update:  [stats] now exists, lots of work to do here!)
  - ???
  - Profit!
 
@@ -75,3 +75,4 @@ None.
    [Twitter Bootstrap]: <http://getbootstrap.com/>
    [jQuery]: <https://jquery.com/>
    [gomin]: <https://github.com/nickvellios/Golang-URL-Minifier>
+   [stats]: <http://r8r.org/stats/>
