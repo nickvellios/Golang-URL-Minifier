@@ -15,7 +15,7 @@ import (
 )
 
 var templateDir = "/root/go/tiny/bin/templates/"
-var baseURL = "http://r8r.org"
+var baseURL = "https://r8r.org"
 
 const (
 	readTimeout  = time.Duration(1 * time.Second)

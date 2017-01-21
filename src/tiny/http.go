@@ -10,13 +10,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/lib/pq"
 	"html/template"
 	"math"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
+
+	_ "github.com/lib/pq"
 )
 
 var templates = template.Must(template.ParseFiles(
@@ -105,9 +106,9 @@ func (udb *urlDB) generateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 301/302 redirects fail without a valid URL.  Our site frondend checks for this and adds a
-	// http:// prefix if no URL scheme is found but we will check and do the same for API requests
+	// https:// prefix if no URL scheme is found but we will check and do the same for API requests
 	if up.Scheme != "http" && up.Scheme != "https" && up.Scheme != "ftp" {
-		urlf = "http://" + urlf
+		urlf = "https://" + urlf
 	}
 
 	// To prevent someone from building predictive redirect chains to try and overload us
