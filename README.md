@@ -1,6 +1,6 @@
 # Golang URL Minifier v0.0.2
 
-[Check it out at http://r8r.org](http://r8r.org)
+[Check it out at https://r8r.org](https://r8r.org)
 
 A URL minifier written in Go.
 
@@ -40,14 +40,14 @@ Limited to 10 requests per hour per IP address
 Example Request (via POST only):
 
 ```sh
-curl --request POST 'http://r8r.org/generate/' --data "url=http://www.golang.org"
+curl --request POST 'https://r8r.org/generate/' --data "url=http://www.golang.org"
 ```
 
 Example JSON Response:
 
 ```sh
 {
-	"url": "http://r8r.org/dvHhd"
+	"url": "https://r8r.org/dvHhd"
 	"error": ""
 }
 ```
