@@ -75,4 +75,4 @@ Unlicense.  For more information, please refer to <http://unlicense.org/>
    [Twitter Bootstrap]: <http://getbootstrap.com/>
    [jQuery]: <https://jquery.com/>
    [gomin]: <https://github.com/nickvellios/Golang-URL-Minifier>
-   [stats]: <http://r8r.org/stats/>
+   [stats]: <https://r8r.org/stats/>
