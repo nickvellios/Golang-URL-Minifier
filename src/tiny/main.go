@@ -7,10 +7,11 @@
 package main
 
 import (
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 var templateDir = "/root/go/tiny/bin/templates/"
@@ -37,5 +38,15 @@ func main() {
 		WriteTimeout: writeTimeout,
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	srv_tls := http.Server{
+		Addr:         ":443",
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+	}
+
+	go func() {
+		log.Fatal(srv.ListenAndServe())
+	}()
+
+	log.Fatal(srv_tls.ListenAndServeTLS("/etc/certs/sites/site.org/cert.pem", "/etc/certs/sites/site.org/privkey.pem"))
 }
